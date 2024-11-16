@@ -28,6 +28,7 @@ doctors_db = {}
 appointments_db = {}
 users_db = {}
 symptom_history = {}
+prescriptions_db = {}
 notifications_db = {}
 
 # Basic Pydantic Models
@@ -68,6 +69,12 @@ class DoctorModel(BaseModel):
     email: str
     contact: Optional[str]
     availability: List[str]  # List of available times/days
+
+# Add this to your existing models
+class PrescriptionCreate(BaseModel):
+    appointment_id: str
+    prescription_details: str
+    doctor_notes: Optional[str]
 
 # Appointment Model
 class AppointmentRequest(BaseModel):
@@ -235,3 +242,112 @@ async def get_all_symptoms(authenticated: bool = Depends(authenticate)):
                 "status": entry["status"]
             })
     return {"total_symptoms_submissions": len(all_symptoms), "submissions": all_symptoms}
+
+@app.post("/appointments/{appointment_id}/prescription")
+async def create_prescription(
+    appointment_id: str,
+    prescription: PrescriptionCreate,
+    authenticated: bool = Depends(authenticate)
+):
+    # Check if appointment exists
+    if appointment_id not in appointments_db:
+        raise HTTPException(status_code=404, detail="Appointment not found")
+    
+    # Create prescription entry
+    prescription_id = str(len(prescriptions_db) + 1)
+    prescription_data = {
+        "prescription_id": prescription_id,
+        "appointment_id": appointment_id,
+        "prescription_details": prescription.prescription_details,
+        "doctor_notes": prescription.doctor_notes,
+        "doctor_id": appointments_db[appointment_id]["doctor_id"],
+        "patient_id": appointments_db[appointment_id]["patient_id"],
+        "created_at": "2024-11-16"  # In production, use actual datetime
+    }
+    
+    prescriptions_db[prescription_id] = prescription_data
+    
+    # Update appointment status
+    appointments_db[appointment_id]["status"] = "Prescribed"
+    
+    # Create notification for patient
+    patient_id = appointments_db[appointment_id]["patient_id"]
+    if patient_id not in notifications_db:
+        notifications_db[patient_id] = []
+    
+    notifications_db[patient_id].append({
+        "notification_id": str(len(notifications_db.get(patient_id, [])) + 1),
+        "message": "New prescription available for your appointment",
+        "type": "prescription",
+        "appointment_id": appointment_id,
+        "read": False
+    })
+    
+    return {
+        "message": "Prescription created successfully",
+        "prescription_id": prescription_id,
+        "prescription_data": prescription_data
+    }
+
+@app.get("/appointments/{appointment_id}/prescription")
+async def get_prescription(
+    appointment_id: str,
+    authenticated: bool = Depends(authenticate)
+):
+    # Find prescription for the appointment
+    prescription = next(
+        (p for p in prescriptions_db.values() if p["appointment_id"] == appointment_id),
+        None
+    )
+    
+    if not prescription:
+        raise HTTPException(
+            status_code=404,
+            detail="No prescription found for this appointment"
+        )
+    
+    return prescription
+
+@app.get("/prescriptions/patient/{patient_id}")
+async def get_patient_prescriptions(
+    patient_id: str,
+    authenticated: bool = Depends(authenticate)
+):
+    patient_prescriptions = [
+        p for p in prescriptions_db.values()
+        if p["patient_id"] == patient_id
+    ]
+    
+    return {
+        "patient_id": patient_id,
+        "prescriptions": patient_prescriptions
+    }
+
+@app.put("/appointments/{appointment_id}/prescription/{prescription_id}")
+async def update_prescription(
+    appointment_id: str,
+    prescription_id: str,
+    prescription: PrescriptionCreate,
+    authenticated: bool = Depends(authenticate)
+):
+    # Check if prescription exists
+    if prescription_id not in prescriptions_db:
+        raise HTTPException(status_code=404, detail="Prescription not found")
+    
+    # Check if prescription belongs to the appointment
+    if prescriptions_db[prescription_id]["appointment_id"] != appointment_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Prescription does not belong to this appointment"
+        )
+    
+    # Update prescription
+    prescriptions_db[prescription_id].update({
+        "prescription_details": prescription.prescription_details,
+        "doctor_notes": prescription.doctor_notes
+    })
+    
+    return {
+        "message": "Prescription updated successfully",
+        "prescription_data": prescriptions_db[prescription_id]
+    }
