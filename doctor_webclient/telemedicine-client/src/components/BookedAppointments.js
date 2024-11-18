@@ -210,49 +210,49 @@ const AppointmentDetails = ({ appointment, onBack }) => {
     e.preventDefault();
     setSaving(true);
     
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      // Add your actual API call here
-      alert('Prescription saved successfully!');
-    } catch (error) {
-      alert('Failed to save prescription');
-    } finally {
-      setSaving(false);
-    }
-  };
+  //   try {
+  //     // Simulate API call
+  //     await new Promise(resolve => setTimeout(resolve, 1000));
+  //     // Add your actual API call here
+  //     alert('Prescription saved successfully!');
+  //   } catch (error) {
+  //     alert('Failed to save prescription');
+  //   } finally {
+  //     setSaving(false);
+  //   }
+  // };
   
-//   try {
-//     const response = await fetch(`/api/appointments/${appointment.appointment_id}/prescription`, {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//         'Authorization': `Bearer sample-token` // Assuming you store the token in localStorage
-//       },
-//       body: JSON.stringify({
-//         appointment_id: appointment.appointment_id,
-//         prescription_details: prescription,
-//         doctor_notes: notes
-//       })
-//     });
+  try {
+    const response = await fetch(`/api/appointments/${appointment.appointment_id}/prescription`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer sample-token` // Assuming you store the token in localStorage
+      },
+      body: JSON.stringify({
+        appointment_id: appointment.appointment_id,
+        prescription_details: prescription,
+        doctor_notes: notes
+      })
+    });
 
-//     if (!response.ok) {
-//       throw new Error('Failed to save prescription');
-//     }
+    if (!response.ok) {
+      throw new Error('Failed to save prescription');
+    }
 
-//     const data = await response.json();
-//     alert('Prescription saved successfully!');
+    const data = await response.json();
+    alert('Prescription saved successfully!');
     
-//     // Optionally, you can clear the form or handle the response
-//     // setPrescription('');
-//     // setNotes('');
+    // Optionally, you can clear the form or handle the response
+    // setPrescription('');
+    // setNotes('');
     
-//   } catch (error) {
-//     alert('Failed to save prescription: ' + error.message);
-//   } finally {
-//     setSaving(false);
-//   }
-// };
+  } catch (error) {
+    alert('Failed to save prescription: ' + error.message);
+  } finally {
+    setSaving(false);
+  }
+};
 
   return (
     <div style={styles.detailsContainer}>

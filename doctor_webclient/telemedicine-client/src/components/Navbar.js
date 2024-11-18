@@ -13,7 +13,7 @@ const Navbar = () => {
       <a style={styles.navLink} href="/">
         <div style={styles.logo}>
           <span style={styles.logoText}>Medi</span>
-          <span style={styles.logoHighlight}>sphere</span>
+          <span style={styles.logoHighlight}>Sphere</span>
         </div>
         </a>
         <div style={styles.searchContainer}>
@@ -41,13 +41,13 @@ const Navbar = () => {
           }}
         >
           <li style={styles.navItem}>
-            <a style={styles.navLink} href="#appointments">Appointments</a>
+            <a style={styles.navLink} href="/">Dashboard</a>
           </li>
           <li style={styles.navItem}>
-            <a style={styles.navLink} href="#patients">Patients</a>
+            <a style={styles.navLink} href="/booked-appointments">Appointments</a>
           </li>
           <li style={styles.navItem}>
-            <a style={styles.navLink} href="#consultations">Consultations</a>
+            <a style={styles.navLink} href="#consultations">Patients</a>
           </li>
         </ul>
         <div style={styles.actions}>

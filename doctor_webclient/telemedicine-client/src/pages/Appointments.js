@@ -1,31 +1,24 @@
 import React from 'react';
 import Navbar from './components/Navbar';
-// import DoctorList from './components/DoctorList';
-// import DoctorDashboard from './pages/DoctorDashboard';
-// import DoctorAppointments from './components/DoctorAppointments';
-// import TestSymptomsView from './components/TestSymptomsView';
 import BookedAppointments from './components/BookedAppointments';
 import ChatbotComponent from './components/ChatbotComponent';
 import DoctorDashboard from './pages/DoctorDashboard';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-} from "react-router-dom";
 
-function App() {
+// import {Routes, Route, BrowserRouter as Router} from "react-router-dom";
+
+function Appointment() {
   return (
     <div className="App">
       <Navbar/>
-      <Router>  
+      <Router>
         <Routes>
           <Route path="/" element={<DoctorDashboard />} />
-          <Route path="/booked-appointments" element={<BookedAppointments />} />
         </Routes>
       </Router>
+      <BookedAppointments />
       <ChatbotComponent/>
     </div>
   );
 }
 
-export default App;
+export default Appointment;

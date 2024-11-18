@@ -7,7 +7,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 
 # Initialize Firebase app with service account credentials
-cred = credentials.Certificate('path/to/serviceAccountKey.json')  # Replace with your Firebase service account file
+cred = credentials.Certificate('health12x-firebase-adminsdk-g9ljh-f124cecc94.json')  # Replace with your Firebase service account file
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
