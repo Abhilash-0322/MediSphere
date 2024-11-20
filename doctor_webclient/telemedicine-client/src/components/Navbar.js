@@ -12,8 +12,10 @@ const Navbar = () => {
       <div style={styles.leftSection}>
       <a style={styles.navLink} href="/">
         <div style={styles.logo}>
+          {/* <span style={styles.logoHighlight}><b>💬</b></span>
           <span style={styles.logoText}>Medi</span>
-          <span style={styles.logoHighlight}>Sphere</span>
+          <span style={styles.logoHighlight}>sphere</span> */}
+          <img src="Screenshot 2024-11-19 125347.png" alt="MediSphere" style={{width: '150px'}} />
         </div>
         </a>
         <div style={styles.searchContainer}>
@@ -47,7 +49,7 @@ const Navbar = () => {
             <a style={styles.navLink} href="/booked-appointments">Appointments</a>
           </li>
           <li style={styles.navItem}>
-            <a style={styles.navLink} href="#consultations">Patients</a>
+            <a style={styles.navLink} href="#patients">Patients</a>
           </li>
         </ul>
         <div style={styles.actions}>
@@ -93,17 +95,22 @@ const styles = {
   logo: {
     display: 'flex',
     fontSize: '28px',
-    fontWeight: 'bold',
+    height: '35px',
+    width: '160px',
+    // fontWeight: 'bold',
     letterSpacing: '-0.5px',
   },
 
   logoText: {
-    color: '#333',
+    color: '#730093',
+    background: 'linear-gradient(45deg, #6a1b9a, #9c27b0)',
+    backgroundClip: 'text',
+    fontWeight: 'bold',
   },
 
   logoHighlight: {
     background: 'linear-gradient(45deg, #6a1b9a, #9c27b0)',
-    backgroundClip: 'text',
+    fontWeight:'10',
     WebkitBackgroundClip: 'text',
     color: 'transparent',
   },

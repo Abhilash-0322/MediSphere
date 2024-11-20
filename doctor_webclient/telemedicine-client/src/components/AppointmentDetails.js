@@ -43,6 +43,7 @@ const AppointmentDetails = () => {
             <h2>Appointment Details</h2>
             <p><strong>Patient ID:</strong> {appointmentDetails.patient_id}</p>
             <p><strong>Submission ID:</strong> {appointmentDetails.submission_id}</p>
+            <p><strong>Heart Info:</strong> {appointmentDetails.heart_info}</p>
             <p><strong>Symptoms:</strong></p>
             <ul>
                 {appointmentDetails.symptoms.map((symptom, index) => (

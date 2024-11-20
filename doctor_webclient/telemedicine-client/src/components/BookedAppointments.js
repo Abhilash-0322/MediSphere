@@ -179,7 +179,7 @@ const AppointmentCard = ({ appointment, onViewDetails }) => {
         <p style={styles.submissionId}>
           <strong>Submission ID:</strong> {appointment.submission_id}
         </p>
-        
+        <p><strong>Heart Info:</strong> {appointment.heart_rate}</p>
         <div style={styles.symptomsSection}>
           <p style={styles.symptomsTitle}><strong>Reported Symptoms:</strong></p>
           <ul style={styles.symptomsList}>
@@ -200,59 +200,70 @@ const AppointmentCard = ({ appointment, onViewDetails }) => {
   );
 };
 
-// Detailed Appointment View Component
 const AppointmentDetails = ({ appointment, onBack }) => {
   const [prescription, setPrescription] = useState('');
   const [notes, setNotes] = useState('');
+  const [additional_notes, setAdditionalNotes] = useState('');
   const [saving, setSaving] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-    
-  //   try {
-  //     // Simulate API call
-  //     await new Promise(resolve => setTimeout(resolve, 1000));
-  //     // Add your actual API call here
-  //     alert('Prescription saved successfully!');
-  //   } catch (error) {
-  //     alert('Failed to save prescription');
-  //   } finally {
-  //     setSaving(false);
-  //   }
-  // };
-  
-  try {
-    const response = await fetch(`/api/appointments/${appointment.appointment_id}/prescription`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer sample-token` // Assuming you store the token in localStorage
-      },
-      body: JSON.stringify({
-        appointment_id: appointment.appointment_id,
+
+    try {
+      // Validate required fields
+      if (!appointment?.submission_id) {
+        throw new Error("Missing submission ID");
+      }
+      if (!prescription.trim()) {
+        throw new Error("Prescription details are required");
+      }
+      if (!notes.trim()) {
+        throw new Error("Doctor notes are required");
+      }
+
+      // Prepare prescription data
+      const prescriptionData = {
+        appointment_id: appointment.submission_id, // Using submission_id from appointment
         prescription_details: prescription,
-        doctor_notes: notes
-      })
-    });
+        doctor_notes: notes + (additional_notes ? `\n\nAdditional Notes: ${additional_notes}` : '')
+      };
 
-    if (!response.ok) {
-      throw new Error('Failed to save prescription');
+      console.log("Submitting prescription data:", prescriptionData);
+
+      const response = await fetch('http://127.0.0.1:8000/prescriptions/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(prescriptionData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to save prescription');
+      }
+
+      const data = await response.json();
+      console.log("Prescription saved successfully:", data);
+      alert('Prescription saved successfully!');
+      
+      // Reset form fields
+      setPrescription('');
+      setNotes('');
+      setAdditionalNotes('');
+      
+      // Optionally go back to the appointments list
+      onBack();
+      
+    } catch (error) {
+      console.error("Error during prescription submission:", error);
+      const errorMessage = error.message || 'An unexpected error occurred';
+      alert(`Failed to save prescription: ${errorMessage}`);
+    } finally {
+      setSaving(false);
     }
-
-    const data = await response.json();
-    alert('Prescription saved successfully!');
-    
-    // Optionally, you can clear the form or handle the response
-    // setPrescription('');
-    // setNotes('');
-    
-  } catch (error) {
-    alert('Failed to save prescription: ' + error.message);
-  } finally {
-    setSaving(false);
-  }
-};
+  };
 
   return (
     <div style={styles.detailsContainer}>
@@ -264,6 +275,7 @@ const AppointmentDetails = ({ appointment, onBack }) => {
         <div style={styles.patientInfo}>
           <h2 style={styles.detailsHeading}>Appointment Details</h2>
           <p><strong>Patient ID:</strong> {appointment.patient_id}</p>
+          <p><strong>Heart Info:</strong> {appointment.heart_rate}</p>
           <p><strong>Submission ID:</strong> {appointment.submission_id}</p>
           <p><strong>Status:</strong> {appointment.status}</p>
           
@@ -281,22 +293,35 @@ const AppointmentDetails = ({ appointment, onBack }) => {
           <h3 style={styles.formHeading}>Prescription & Notes</h3>
           
           <div style={styles.formGroup}>
-            <label style={styles.label}>Prescription</label>
+            <label style={styles.label}>Prescription*</label>
             <textarea
               style={styles.textarea}
               value={prescription}
               onChange={(e) => setPrescription(e.target.value)}
               placeholder="Enter prescription details..."
               rows={6}
+              required
             />
           </div>
 
           <div style={styles.formGroup}>
-            <label style={styles.label}>Doctor's Notes</label>
+            <label style={styles.label}>Doctor's Notes*</label>
             <textarea
               style={styles.textarea}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
+              placeholder="Enter doctor's notes..."
+              rows={4}
+              required
+            />
+          </div>
+
+          <div style={styles.formGroup}>
+            <label style={styles.label}>Additional Notes (Optional)</label>
+            <textarea
+              style={styles.textarea}
+              value={additional_notes}
+              onChange={(e) => setAdditionalNotes(e.target.value)}
               placeholder="Enter any additional notes..."
               rows={4}
             />
@@ -304,7 +329,11 @@ const AppointmentDetails = ({ appointment, onBack }) => {
 
           <button 
             type="submit" 
-            style={styles.submitButton}
+            style={{
+              ...styles.submitButton,
+              opacity: saving ? 0.7 : 1,
+              cursor: saving ? 'not-allowed' : 'pointer'
+            }}
             disabled={saving}
           >
             {saving ? 'Saving...' : 'Save Prescription'}

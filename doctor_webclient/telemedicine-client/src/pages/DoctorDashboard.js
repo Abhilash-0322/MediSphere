@@ -1,5 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
+import BookedAppointments from '../components/BookedAppointments';
+import PrescriptionViewer from '../components/PrescriptionViewer';
 
 const styles = {
   dashboardContainer: {
@@ -143,7 +145,7 @@ const DoctorDashboard = () => {
     // Fetch dashboard data
     const fetchDashboardData = async () => {
       try {
-        const token = localStorage.getItem('token');
+        // const token = localStorage.getItem('token');
         
         // Mock API calls - replace with actual endpoints
         const endpoints = [
@@ -157,7 +159,7 @@ const DoctorDashboard = () => {
           endpoints.map(endpoint => 
             fetch(endpoint, {
               headers: {
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer sample-token`,  // Replace with your token
               }
             }).then(res => res.json())
           )
@@ -182,7 +184,7 @@ const DoctorDashboard = () => {
       case 'appointments':
         return (
           <div style={styles.sectionContainer}>
-            <h2>Upcoming Appointments</h2>
+            <h2>Recent Appointments</h2>
             {dashboardData.appointments.map(appointment => (
               <div key={appointment.id} style={styles.cardContainer}>
                 <div>
@@ -193,7 +195,8 @@ const DoctorDashboard = () => {
                 <button style={styles.actionButton}>View Details</button>
               </div>
             ))}
-          </div>
+          </div>,
+          <BookedAppointments/>
         );
       case 'patients':
         return (
@@ -224,7 +227,8 @@ const DoctorDashboard = () => {
                 <button style={styles.actionButton}>View Prescription</button>
               </div>
             ))}
-          </div>
+          </div>,
+          <PrescriptionViewer/>
         );
       case 'notifications':
         return (

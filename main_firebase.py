@@ -11,15 +11,21 @@ cred = credentials.Certificate('health12x-firebase-adminsdk-g9ljh-f124cecc94.jso
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
+import firebase_admin
+from firebase_admin import credentials
+
+cred = credentials.Certificate("path/to/serviceAccountKey.json")
+firebase_admin.initialize_app(cred)
+
 app = FastAPI()
 
 # CORS middleware setup
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Update this to match your frontend origin
+    allow_origins=["*"],  # Allows all origins (use cautiously)
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allow all headers (use specific headers as needed)
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Basic Pydantic Models

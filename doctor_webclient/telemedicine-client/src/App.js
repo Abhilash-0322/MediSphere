@@ -20,7 +20,7 @@ function App() {
       <Router>  
         <Routes>
           <Route path="/" element={<DoctorDashboard />} />
-          <Route path="/booked-appointments" element={<BookedAppointments />} />
+          <Route path="/booked-appointments" element={<BookedAppointments />}/>
         </Routes>
       </Router>
       <ChatbotComponent/>

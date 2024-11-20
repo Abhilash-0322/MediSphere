@@ -4,7 +4,6 @@ import BookedAppointments from './components/BookedAppointments';
 import ChatbotComponent from './components/ChatbotComponent';
 import DoctorDashboard from './pages/DoctorDashboard';
 
-// import {Routes, Route, BrowserRouter as Router} from "react-router-dom";
 
 function Appointment() {
   return (
@@ -12,7 +11,7 @@ function Appointment() {
       <Navbar/>
       <Router>
         <Routes>
-          <Route path="/" element={<DoctorDashboard />} />
+          <Route path="/" element={<DoctorDashboard />}/>
         </Routes>
       </Router>
       <BookedAppointments />

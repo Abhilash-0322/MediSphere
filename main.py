@@ -3,17 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List
 from enum import Enum
+import time
+from serial_reader import HeartRateReader
 
 app = FastAPI()
-
-# CORS middleware setup
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["http://127.0.0.1:3000"],  # Allow requests from your frontend origin (modify as needed)
-#     allow_credentials=True,                   # Allow credentials like cookies or headers for auth
-#     allow_methods=["*"],                      # Allow all HTTP methods
-#     allow_headers=["*"],                      # Allow all headers, e.g., for token-based auth
-# )
 
 app.add_middleware(
     CORSMiddleware,
@@ -22,6 +15,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Option 1: Using context manager
+def get_heart_rate_data():
+    reader = HeartRateReader(serial_port='COM10')
+    reader.connect()  # Establish the connection
+    try:
+        data = reader.read_data()
+        if data:
+           return data
+            # print(f"Heart Rate Data: {data}")
+    except KeyboardInterrupt:
+        pass
 
 # Dummy data for demonstration purposes
 doctors_db = {}
@@ -50,6 +55,7 @@ class UserProfileUpdateRequest(BaseModel):
 class SymptomRequest(BaseModel):
     patient_id: str
     symptoms: List[str]
+    # heart_rate: str
 
 class FeedbackRequest(BaseModel):
     user_id: str
@@ -71,10 +77,15 @@ class DoctorModel(BaseModel):
     availability: List[str]  # List of available times/days
 
 # Add this to your existing models
+# class PrescriptionCreate(BaseModel):
+#     appointment_id: str
+#     prescription_details: str
+#     doctor_notes: Optional[str]
+
 class PrescriptionCreate(BaseModel):
     appointment_id: str
     prescription_details: str
-    doctor_notes: Optional[str]
+    doctor_notes: str
 
 # Appointment Model
 class AppointmentRequest(BaseModel):
@@ -91,6 +102,49 @@ def authenticate(authorization: str = Header(...)):
     if not authorization.startswith("Bearer ") or authorization.split(" ")[1] != MOCK_TOKEN:
         raise HTTPException(status_code=403, detail="Invalid token")
     return True
+
+@app.post("/prescriptions/submit")
+async def submit_prescription(prescription: PrescriptionCreate):
+    """
+    Allows submission of a prescription with updated fields.
+    """
+    try:
+        # Create prescription entry
+        prescription_id = str(len(prescriptions_db) + 1)
+        prescription_data = {
+            "prescription_id": prescription_id,
+            "submission_id": prescription.appointment_id,  # Using appointment_id as submission_id
+            "prescription_details": prescription.prescription_details,
+            "doctor_notes": prescription.doctor_notes,
+            "created_at": "2024-11-16",  # In production, use actual datetime
+            "status": "prescribed"  # Adding status field
+        }
+        
+        prescriptions_db[prescription_id] = prescription_data
+        
+        # Update appointment status if it exists
+        if prescription.appointment_id in appointments_db:
+            appointments_db[prescription.appointment_id]["status"] = "prescribed"
+        
+        return {
+            "status": "success",
+            "message": "Prescription submitted successfully",
+            "prescription_id": prescription_id,
+            "prescription_data": prescription_data
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/prescriptions")
+async def get_all_prescriptions(authenticated: bool = Depends(authenticate)):
+    """
+    Fetches all the submitted prescriptions in the system.
+    """
+    return {
+        "total_prescriptions": len(prescriptions_db),
+        "prescriptions": list(prescriptions_db.values())
+    }
 
 # Register endpoint
 @app.post("/register")
@@ -142,18 +196,22 @@ async def update_user_profile(user_id: str, update: UserProfileUpdateRequest, au
     return {"message": "User profile updated successfully"}
 
 # Submit symptoms endpoint
+
 @app.post("/submit-symptoms")
 async def receive_symptoms(request: SymptomRequest, authenticated: bool = Depends(authenticate)):
+    heart_data=get_heart_rate_data()
     if request.patient_id not in symptom_history:
         symptom_history[request.patient_id] = []
     symptom_id = len(symptom_history[request.patient_id]) + 1
     symptom_entry = {
         "submission_id": str(symptom_id),
         "symptoms": request.symptoms,
+        "timestamp": time.time(),  
+        "heart_rate": f"{heart_data}",
         "status": "Processing"
     }
     symptom_history[request.patient_id].append(symptom_entry)
-    return {"message": f"Symptoms for patient {request.patient_id} received.", "received_symptoms": request.symptoms, "status": "Processing"}
+    return {"message": f"Symptoms for patient {request.patient_id} received.", "received_symptoms": request.symptoms,"heart_info":f"{heart_data}", "status": "Processing"}
 
 # Get symptom history endpoint
 @app.get("/symptoms/history/{user_id}")
@@ -239,7 +297,9 @@ async def get_all_symptoms(authenticated: bool = Depends(authenticate)):
                 "patient_id": patient_id,
                 "submission_id": entry["submission_id"],
                 "symptoms": entry["symptoms"],
-                "status": entry["status"]
+                "status": entry["status"],
+                "timestamp": entry["timestamp"],
+                "heart_rate": entry["heart_rate"]
             })
     return {"total_symptoms_submissions": len(all_symptoms), "submissions": all_symptoms}
 
