@@ -6,6 +6,7 @@ from enum import Enum
 import time
 import firebase_admin
 from firebase_admin import credentials, db
+from make_pdf import fetch_last_prescription, create_prescription_pdf, upload_to_google_drive
 from serial_reader import HeartRateReader
 
 app = FastAPI()
@@ -160,13 +161,52 @@ def get_time():
     formatted_time = time.strftime("%Y-%m-%d %H:%M:%S", current_time)
     return formatted_time
 
+# @app.post("/prescriptions/submit")
+# async def submit_prescription(prescription: PrescriptionCreate):
+#     """
+#     Saves prescription data to Firebase Realtime Database.
+#     """
+#     try:
+#         prescription_id = prescriptions_ref.push().key
+#         prescription_data = {
+#             "prescription_id": prescription_id,
+#             "appointment_id": prescription.appointment_id,
+#             "medicine_name": prescription.medicine_name,
+#             "dose": prescription.dose,
+#             "frequency": prescription.frequency,
+#             "duration": prescription.duration,
+#             "instructions": prescription.instructions,
+#             "url": upload_to_google_drive("./prescription.pdf"),
+#             "created_at": f"{get_time()}",  # In production, use actual datetime",
+#             "status": "prescribed"
+#         }
+#         prescriptions_ref.child(prescription_id).set(prescription_data)
+#         last_prescription = fetch_last_prescription()
+#         create_prescription_pdf(last_prescription, "Screenshot 2024-11-18 171703.png", "prescription.pdf", "Vishnukant Clinic")
+
+#         # Update appointment status
+#         appointment = appointments_ref.child(prescription.appointment_id).get()
+#         if appointment:
+#             appointments_ref.child(prescription.appointment_id).update({"status": "Prescribed"})
+
+#         return {
+#             "message": "Prescription submitted successfully",
+#             "prescription_id": prescription_id,
+#             "prescription_data": prescription_data
+#         }
+#     except Exception as e:
+#         raise HTTPException(status_code=400, detail=str(e))
+
 @app.post("/prescriptions/submit")
 async def submit_prescription(prescription: PrescriptionCreate):
     """
-    Saves prescription data to Firebase Realtime Database.
+    Saves prescription data to Firebase Realtime Database and uploads the corresponding PDF to Google Drive.
     """
     try:
+        # Generate a unique ID for the prescription
         prescription_id = prescriptions_ref.push().key
+        
+        # Prepare prescription data
         prescription_data = {
             "prescription_id": prescription_id,
             "appointment_id": prescription.appointment_id,
@@ -175,20 +215,36 @@ async def submit_prescription(prescription: PrescriptionCreate):
             "frequency": prescription.frequency,
             "duration": prescription.duration,
             "instructions": prescription.instructions,
-            "created_at": f"{get_time()}",  # In production, use actual datetime",
+            "created_at": f"{get_time()}",
             "status": "prescribed"
         }
+
+        # Save the prescription data to Firebase (without the URL yet)
         prescriptions_ref.child(prescription_id).set(prescription_data)
 
-        # Update appointment status
+        # Create the prescription PDF for this specific prescription
+        pdf_filename = f"prescription_{prescription_id}.pdf"
+        create_prescription_pdf(prescription_data, "Screenshot 2024-11-18 171703.png", pdf_filename, "Vishnukant Clinic")
+
+        # Upload the PDF to Google Drive
+        pdf_url = upload_to_google_drive(pdf_filename)
+
+        # Update the prescription data with the URL in Firebase
+        prescriptions_ref.child(prescription_id).update({"url": pdf_url})
+
+        # Update the appointment status in Firebase
         appointment = appointments_ref.child(prescription.appointment_id).get()
         if appointment:
             appointments_ref.child(prescription.appointment_id).update({"status": "Prescribed"})
 
+        # Return a success response
         return {
             "message": "Prescription submitted successfully",
             "prescription_id": prescription_id,
-            "prescription_data": prescription_data
+            "prescription_data": {
+                **prescription_data,
+                "url": pdf_url
+            }
         }
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
