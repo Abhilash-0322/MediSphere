@@ -12,6 +12,7 @@ import {
   Routes,
   Route,
 } from "react-router-dom";
+import AppointmentsDisplay from './components/AppointmentsDisplay';
 
 function App() {
   return (
@@ -20,7 +21,7 @@ function App() {
       <Router>  
         <Routes>
           <Route path="/" element={<DoctorDashboard />} />
-          <Route path="/booked-appointments" element={<BookedAppointments />}/>
+          <Route path="/booked-appointments" element={<AppointmentsDisplay/>}/>
         </Routes>
       </Router>
       <ChatbotComponent/>

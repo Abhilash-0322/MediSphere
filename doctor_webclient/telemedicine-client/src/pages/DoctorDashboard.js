@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import BookedAppointments from '../components/BookedAppointments';
 import PrescriptionViewer from '../components/PrescriptionViewer';
+import AppointmentsDisplay from '../components/AppointmentsDisplay';
 
 const styles = {
   dashboardContainer: {
@@ -196,7 +196,7 @@ const DoctorDashboard = () => {
               </div>
             ))}
           </div>,
-          <BookedAppointments/>
+          <AppointmentsDisplay/>
         );
       case 'patients':
         return (

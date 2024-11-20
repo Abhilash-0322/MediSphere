@@ -129,6 +129,7 @@ const BookedAppointments = () => {
   );
 };
 
+
 // Appointment Card List Component
 const AppointmentsList = ({ symptomsData, onViewDetails }) => {
   return (

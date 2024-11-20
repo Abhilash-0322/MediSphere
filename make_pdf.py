@@ -278,6 +278,7 @@ data = {
     "Prescription Date": "2024-11-16",
 }
 
+
 # Path to the uploaded logo image file
 logo_path = "Screenshot 2024-11-18 171703.png"
 
