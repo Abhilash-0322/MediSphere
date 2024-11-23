@@ -430,19 +430,51 @@ def fetch_last_prescription():
     return prescriptions[last_key]
 
 
+# def create_prescription_pdf(data, logo_path, filename, clinic_name):
+#     c = canvas.Canvas(filename, pagesize=letter)
+#     width, height = letter
+
+#     if logo_path:
+#         c.drawImage(ImageReader(logo_path), 0, height - 120, width=width, height=120, mask='auto')
+
+#     c.setFont("Helvetica-Bold", 14)
+#     c.drawString(50, height - 140, clinic_name)
+
+#     c.setStrokeColor(colors.black)
+#     c.line(50, height - 160, width - 50, height - 160)
+
+#     table_data = [[key, value] for key, value in data.items()]
+#     table = Table(table_data, colWidths=[150, 300])
+#     table.setStyle(TableStyle([
+#         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+#         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+#         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+#         ('GRID', (0, 0), (-1, -1), 1, colors.black),
+#     ]))
+#     table.wrapOn(c, width, height)
+#     table.drawOn(c, 50, height - 200 - len(data) * 20)
+
+
+#     c.save()
+
+
 def create_prescription_pdf(data, logo_path, filename, clinic_name):
     c = canvas.Canvas(filename, pagesize=letter)
     width, height = letter
 
+    # Add the clinic's logo at the top if provided
     if logo_path:
         c.drawImage(ImageReader(logo_path), 0, height - 120, width=width, height=120, mask='auto')
 
+    # Add the clinic name
     c.setFont("Helvetica-Bold", 14)
     c.drawString(50, height - 140, clinic_name)
 
+    # Add a separator line
     c.setStrokeColor(colors.black)
     c.line(50, height - 160, width - 50, height - 160)
 
+    # Create the table from the prescription data
     table_data = [[key, value] for key, value in data.items()]
     table = Table(table_data, colWidths=[150, 300])
     table.setStyle(TableStyle([
@@ -453,6 +485,13 @@ def create_prescription_pdf(data, logo_path, filename, clinic_name):
     ]))
     table.wrapOn(c, width, height)
     table.drawOn(c, 50, height - 200 - len(data) * 20)
+
+    # Add "Powered by Medisphere" at the bottom of the page
+    footer_margin = 20  # Space from the bottom of the page
+    c.setFont("Helvetica", 10)
+    c.setFillColor(colors.purple)
+    c.drawString((width - 100) / 2, footer_margin, "Powered by Medisphere")  # Centered text
+
     c.save()
 
 

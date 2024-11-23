@@ -12,10 +12,10 @@ const Navbar = () => {
       <div style={styles.leftSection}>
       <a style={styles.navLink} href="/">
         <div style={styles.logo}>
-          {/* <span style={styles.logoHighlight}><b>💬</b></span>
+          <span style={styles.logoHighlight}><b></b></span>
           <span style={styles.logoText}>Medi</span>
-          <span style={styles.logoHighlight}>sphere</span> */}
-          <img src="Screenshot 2024-11-19 125347.png" alt="MediSphere" style={{width: '150px'}} />
+          <span style={styles.logoHighlight}>sphere</span>
+          {/* <img src="Screenshot 2024-11-19 125347.png" alt="MediSphere" style={{width: '150px'}} /> */}
         </div>
         </a>
         <div style={styles.searchContainer}>
@@ -97,7 +97,7 @@ const styles = {
     fontSize: '28px',
     height: '35px',
     width: '160px',
-    // fontWeight: 'bold',
+    fontWeight: 'bold',
     letterSpacing: '-0.5px',
   },
 

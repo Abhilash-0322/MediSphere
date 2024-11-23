@@ -256,7 +256,7 @@ const DoctorDashboard = () => {
         <div style={styles.profileSection}>
           <div style={styles.profileAvatar}>DR</div>
           <div style={styles.profileInfo}>
-            <h1 style={styles.profileName}>Dr. Smith</h1>
+            <h1 style={styles.profileName}>Dr. Vishnukant Vishwakarma</h1>
             <p style={styles.profileRole}>General Physician</p>
           </div>
         </div>
