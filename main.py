@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
+import os
 from pydantic import BaseModel
 from typing import Optional, List
 from enum import Enum
@@ -8,13 +9,24 @@ import firebase_admin
 from firebase_admin import credentials, db
 from make_pdf import fetch_last_prescription, create_prescription_pdf, upload_to_google_drive
 from serial_reader import HeartRateReader
+import dotenv
+
+# Load environment variables from .env file
+dotenv.load_dotenv()
+
+# File path where Firebase expects the credentials
+firebase_json_path = "health12x-firebase-adminsdk-g9ljh-f124cecc94.json"
+
+# Only write the file if it doesn't already exist
+if not os.path.exists(firebase_json_path):
+    with open("health12x-firebase-adminsdk-g9ljh-f124cecc94.json", "w") as f:
+        f.write(os.environ["FIREBASE_CREDENTIALS_JSON"])
 
 app = FastAPI()
 
-# Initialize Firebase Admin SDK
-cred = credentials.Certificate("./health12x-firebase-adminsdk-g9ljh-f124cecc94.json")  # Replace with your JSON file path
+cred = credentials.Certificate(firebase_json_path)
 firebase_admin.initialize_app(cred, {
-    "databaseURL": "https://health12x-default-rtdb.firebaseio.com/"  # Replace with your database URL
+    "databaseURL": "https://health12x-default-rtdb.firebaseio.com/"
 })
 
 

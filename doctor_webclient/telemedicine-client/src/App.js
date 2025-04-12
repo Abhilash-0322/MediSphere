@@ -4,7 +4,7 @@ import Navbar from './components/Navbar';
 // import DoctorDashboard from './pages/DoctorDashboard';
 // import DoctorAppointments from './components/DoctorAppointments';
 // import TestSymptomsView from './components/TestSymptomsView';
-import BookedAppointments from './components/BookedAppointments';
+// import BookedAppointments from './components/BookedAppointments';
 import ChatbotComponent from './components/ChatbotComponent';
 import DoctorDashboard from './pages/DoctorDashboard';
 import {
