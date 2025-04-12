@@ -197,6 +197,10 @@ def get_time():
 #     except Exception as e:
 #         raise HTTPException(status_code=400, detail=str(e))
 
+@app.get('/')
+async def root():
+    return {"response":"Welcome to Medisphere"}
+
 @app.post("/prescriptions/submit")
 async def submit_prescription(prescription: PrescriptionCreate):
     """
