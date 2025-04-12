@@ -213,6 +213,10 @@ def get_time():
 async def root():
     return {"response":"Welcome to Medisphere"}
 
+@app.get("/api/test")
+def test():
+    return {"msg": "Hello from backend"}
+
 @app.post("/prescriptions/submit")
 async def submit_prescription(prescription: PrescriptionCreate):
     """
